@@ -6,15 +6,20 @@ using UnityEngine.UIElements;
 public class Player1 : MonoBehaviour
 {
     public float moveSpeed = 7f;
+
+    public float moveDash = 15f;
+    public float dashDuration = 0.2f;
+
+    public float moveStrike = 15f;
+    public float strikeDuration = 0.2f;
     private Rigidbody2D rb;
     private Animator animator;
 
     public Vector3 moveInput;
 
-    public bool isMoving = false;
-    public bool isCrouch = false;
-    //public bool isAttack = false;
-    //public bool isDef = false;
+    private bool isMoving = false;
+    private bool isCrouch = false;
+
 
     public float jumpPower = 3f;
     public Transform groundCheck;
@@ -26,11 +31,8 @@ public class Player1 : MonoBehaviour
     public GameObject bulletPrefab;
     public Transform firePoint;
     public float bulletForce = 5f;
-    Vector2 shootDirection = Vector2.right;
-
-
-
-
+    Vector2 shootDirection;
+    public float delayBeforeShooting = 1f;
 
     void Start()
     {
@@ -42,12 +44,15 @@ public class Player1 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        isGrounded = Physics2D.OverlapCapsule(groundCheck.position, new Vector2(0.5f, 0.08f), CapsuleDirection2D.Horizontal, 0, groundLayer);
 
         MovePlayer();
         JumpPlayer();
+        JumpAttack();
         AttackPlayer();
         DefPlayer();
         CrouchPlayer();
+        DashPlayer();
         StrikePlayer();
         CastPlayer();
     }
@@ -83,32 +88,16 @@ public class Player1 : MonoBehaviour
 
     public void JumpPlayer()
     {
-        isGrounded = Physics2D.OverlapCapsule(groundCheck.position, new Vector2(0.5f, 0.08f), CapsuleDirection2D.Horizontal, 0, groundLayer);
-
-
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded == true)
         {
             rb.velocity = new Vector2(moveInput.x, jumpPower);
             animator.SetTrigger("jump");
             isGrounded = false;
-
         }
 
         if (rb.velocity.y < 0)
         {
             rb.velocity -= vecGravity * fallJump * Time.deltaTime;
-        }
-
-        if (isGrounded == false )
-        {
-            if (Input.GetKeyDown(KeyCode.J))
-            {
-                animator.SetTrigger("jumpAttack");
-            }
-        }
-        else
-        {
-            animator.ResetTrigger("jumpAttack");
         }
 
     }
@@ -119,6 +108,21 @@ public class Player1 : MonoBehaviour
         {
 
             animator.SetTrigger("attack");
+        }
+    }
+
+    public void JumpAttack()
+    {
+        if (Input.GetKeyDown(KeyCode.J) && isGrounded == false)
+        {
+
+            animator.SetTrigger("jumpAttack");
+            Debug.Log("JumpAttack");
+
+        }
+        else
+        {
+            animator.ResetTrigger("jumpAttack");
         }
     }
 
@@ -137,18 +141,10 @@ public class Player1 : MonoBehaviour
 
     public void CrouchPlayer()
     {
-        if (Input.GetKey(KeyCode.S) && isGrounded == true)
+        if (Input.GetKey(KeyCode.S) && isGrounded)
         {
             animator.SetBool("crouch", true);
             isCrouch = true;
-            if (Input.GetKeyDown(KeyCode.J) && isCrouch == true)
-            {
-                animator.SetTrigger("dash");
-            }
-            else
-            {
-                animator.ResetTrigger("dash");
-            }
         }
         else
         {
@@ -157,12 +153,52 @@ public class Player1 : MonoBehaviour
         }
     }
 
+    public void DashPlayer()
+    {
+        if (Input.GetKeyDown(KeyCode.LeftShift) && isGrounded && isMoving == true)
+        {
+            
+            animator.SetTrigger("dash");
+            StartCoroutine(Dash());
+        }
+        else
+        {
+            animator.ResetTrigger("dash");
+        }
+    }
+
+    private IEnumerator Dash()
+    {
+        float originalSpeed = moveSpeed;
+        moveSpeed = moveDash;
+
+        yield return new WaitForSeconds(dashDuration);
+
+        moveSpeed = originalSpeed;
+    }
+
     public void StrikePlayer()
     {
-        if (Input.GetKeyDown(KeyCode.L) && isGrounded == true)
+        if (Input.GetKeyDown(KeyCode.L) && isGrounded == true && isMoving == true)
         {
             animator.SetTrigger("strike");
+            StartCoroutine(Strike());
         }
+
+        else
+        {
+            animator.ResetTrigger("strike");
+        }
+    }
+
+    private IEnumerator Strike()
+    {
+        float originalSpeed = moveSpeed;
+        moveSpeed = moveStrike;
+
+        yield return new WaitForSeconds(strikeDuration);
+
+        moveSpeed = originalSpeed;
     }
 
     public void HurtPlayer()
@@ -172,17 +208,38 @@ public class Player1 : MonoBehaviour
 
     public void CastPlayer()
     {
-        if (Input.GetKeyDown(KeyCode.H) && isGrounded == true)
+        if (Input.GetKeyDown(KeyCode.H) && isGrounded == true && isCrouch == false)
         {
             animator.SetTrigger("cast");
-            Shooting();
+            StartCoroutine(DelayedShooting());
         }
+    }
+
+
+    private IEnumerator DelayedShooting()
+    {
+        yield return new WaitForSeconds(delayBeforeShooting);
+        Shooting();
     }
 
     public void Shooting()
     {
+        UpdateShootDirection();
         var bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
         bullet.GetComponent<Rigidbody2D>().velocity = shootDirection.normalized * bulletForce;
+        bullet.transform.localScale = new Vector3(shootDirection.x, 1, 1);
 
+    }
+
+    private void UpdateShootDirection()
+    {
+        if (transform.localScale.x > 0)
+        {
+            shootDirection = Vector2.right;
+        }
+        else
+        {
+            shootDirection = Vector2.left;
+        }
     }
 }

@@ -7,24 +7,20 @@ public class Bullet : MonoBehaviour
     public GameObject bullet;
     public Animator animator;
     private Rigidbody2D rb;
-    public float life = 2f;
+    public float life = 5f;
+    public float destroyDelay = 2f;
     // Start is called before the first frame update
     void Start()
     {
-        animator= GetComponent<Animator>();
+        animator = GetComponent<Animator>();
+        rb = GetComponent<Rigidbody2D>();
         Destroy(bullet, life);
-        rb= GetComponent<Rigidbody2D>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        
-        animator.SetBool("explosion", true);
+        animator.SetTrigger("explosion");
+        Destroy(bullet,destroyDelay);
     }
 }
