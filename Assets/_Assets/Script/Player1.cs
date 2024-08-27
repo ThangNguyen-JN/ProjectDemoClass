@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Player1 : MonoBehaviour
 {
@@ -15,15 +16,27 @@ public class Player1 : MonoBehaviour
     //public bool isAttack = false;
     //public bool isDef = false;
 
-    public float jumpForce = 3f;
+    public float jumpPower = 3f;
     public Transform groundCheck;
     public LayerMask groundLayer;
-    public bool isGrounded;
+    private bool isGrounded;
+    public float fallJump = 2f;
+    Vector2 vecGravity;
+
+    public GameObject bulletPrefab;
+    public Transform firePoint;
+    public float bulletForce = 5f;
+    Vector2 shootDirection = Vector2.right;
+
+
+
+
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
+        vecGravity = new Vector2(0, -Physics2D.gravity.y);
     }
 
     // Update is called once per frame
@@ -31,11 +44,12 @@ public class Player1 : MonoBehaviour
     {
 
         MovePlayer();
-
+        JumpPlayer();
         AttackPlayer();
         DefPlayer();
         CrouchPlayer();
         StrikePlayer();
+        CastPlayer();
     }
 
     public void MovePlayer()
@@ -58,40 +72,61 @@ public class Player1 : MonoBehaviour
             }
 
         }
+
         else
         {
             isMoving = false;
         }
-        animator.SetBool("isRuning", isMoving);
+        animator.SetFloat("speed", moveInput.sqrMagnitude);
 
     }
 
     public void JumpPlayer()
     {
-        isGrounded = Physics2D.OverlapCapsule(groundCheck.position, new Vector2(0.6f, 0.06f), CapsuleDirection2D.Horizontal, 0, groundLayer);
-        
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded == false) 
+        isGrounded = Physics2D.OverlapCapsule(groundCheck.position, new Vector2(0.5f, 0.08f), CapsuleDirection2D.Horizontal, 0, groundLayer);
+
+
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded == true)
         {
-            rb.AddForce(moveInput * jumpForce);
+            rb.velocity = new Vector2(moveInput.x, jumpPower);
+            animator.SetTrigger("jump");
+            isGrounded = false;
+
         }
+
+        if (rb.velocity.y < 0)
+        {
+            rb.velocity -= vecGravity * fallJump * Time.deltaTime;
+        }
+
+        if (isGrounded == false )
+        {
+            if (Input.GetKeyDown(KeyCode.J))
+            {
+                animator.SetTrigger("jumpAttack");
+            }
+        }
+        else
+        {
+            animator.ResetTrigger("jumpAttack");
+        }
+
     }
 
     public void AttackPlayer()
     {
-        if (Input.GetKeyDown(KeyCode.J) && isCrouch == false )
+        if (Input.GetKeyDown(KeyCode.J) && isCrouch == false && isGrounded)
         {
-            moveSpeed = 0f;
+
             animator.SetTrigger("attack");
         }
-        moveSpeed = 7f;
-
     }
 
     public void DefPlayer()
     {
         if (Input.GetKey(KeyCode.K) && moveInput.x == 0)
         {
-            
+
             animator.SetBool("def", true);
         }
         else
@@ -102,26 +137,29 @@ public class Player1 : MonoBehaviour
 
     public void CrouchPlayer()
     {
-        if (Input.GetKey(KeyCode.S))
+        if (Input.GetKey(KeyCode.S) && isGrounded == true)
         {
             animator.SetBool("crouch", true);
             isCrouch = true;
-            if(Input.GetKeyDown(KeyCode.J) && isCrouch == true)
+            if (Input.GetKeyDown(KeyCode.J) && isCrouch == true)
             {
                 animator.SetTrigger("dash");
-                isCrouch= true;
             }
-        }    
+            else
+            {
+                animator.ResetTrigger("dash");
+            }
+        }
         else
         {
             animator.SetBool("crouch", false);
-            isCrouch= false;
+            isCrouch = false;
         }
     }
 
     public void StrikePlayer()
     {
-        if (Input.GetKeyDown(KeyCode.L)) 
+        if (Input.GetKeyDown(KeyCode.L) && isGrounded == true)
         {
             animator.SetTrigger("strike");
         }
@@ -129,6 +167,22 @@ public class Player1 : MonoBehaviour
 
     public void HurtPlayer()
     {
+
+    }
+
+    public void CastPlayer()
+    {
+        if (Input.GetKeyDown(KeyCode.H) && isGrounded == true)
+        {
+            animator.SetTrigger("cast");
+            Shooting();
+        }
+    }
+
+    public void Shooting()
+    {
+        var bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+        bullet.GetComponent<Rigidbody2D>().velocity = shootDirection.normalized * bulletForce;
 
     }
 }

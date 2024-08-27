@@ -6,11 +6,14 @@ public class Bullet : MonoBehaviour
 {
     public GameObject bullet;
     public Animator animator;
+    private Rigidbody2D rb;
+    public float life = 2f;
     // Start is called before the first frame update
     void Start()
     {
         animator= GetComponent<Animator>();
-        Destroy(bullet, 4f);
+        Destroy(bullet, life);
+        rb= GetComponent<Rigidbody2D>();
     }
 
     // Update is called once per frame
@@ -21,7 +24,7 @@ public class Bullet : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        Destroy(bullet);
+        
         animator.SetBool("explosion", true);
     }
 }
