@@ -9,6 +9,8 @@ public class Player1 : MonoBehaviour
 
     public float moveDash = 15f;
     public float dashDuration = 0.2f;
+    public GameObject dashWindPrefab;
+    public Transform dashWindPoint;
 
     public float moveStrike = 15f;
     public float strikeDuration = 0.2f;
@@ -19,6 +21,7 @@ public class Player1 : MonoBehaviour
 
     private bool isMoving = false;
     private bool isCrouch = false;
+    private bool isJumping = false;
 
 
     public float jumpPower = 3f;
@@ -34,6 +37,7 @@ public class Player1 : MonoBehaviour
     Vector2 shootDirection;
     public float delayBeforeShooting = 1f;
 
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -48,7 +52,6 @@ public class Player1 : MonoBehaviour
 
         MovePlayer();
         JumpPlayer();
-        JumpAttack();
         AttackPlayer();
         DefPlayer();
         CrouchPlayer();
@@ -91,14 +94,33 @@ public class Player1 : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded == true)
         {
             rb.velocity = new Vector2(moveInput.x, jumpPower);
-            animator.SetTrigger("jump");
+            animator.SetBool("jumping", true);
             isGrounded = false;
+            isJumping = true;
+        }
+        else
+        {
+            animator.SetBool("jumping", false);
         }
 
         if (rb.velocity.y < 0)
         {
             rb.velocity -= vecGravity * fallJump * Time.deltaTime;
         }
+
+        if (Input.GetKeyDown(KeyCode.J) && isGrounded == false && isJumping == true)
+        {
+
+            animator.SetTrigger("jumpAttack");
+            Debug.Log("JumpAttack");
+
+        }
+        else
+        {
+            animator.ResetTrigger("jumpAttack");
+        }
+
+        
 
     }
 
@@ -111,21 +133,7 @@ public class Player1 : MonoBehaviour
         }
     }
 
-    public void JumpAttack()
-    {
-        if (Input.GetKeyDown(KeyCode.J) && isGrounded == false)
-        {
-
-            animator.SetTrigger("jumpAttack");
-            Debug.Log("JumpAttack");
-
-        }
-        else
-        {
-            animator.ResetTrigger("jumpAttack");
-        }
-    }
-
+    
     public void DefPlayer()
     {
         if (Input.GetKey(KeyCode.K) && moveInput.x == 0)
@@ -160,6 +168,9 @@ public class Player1 : MonoBehaviour
             
             animator.SetTrigger("dash");
             StartCoroutine(Dash());
+            GameObject dashWind = Instantiate(dashWindPrefab, dashWindPoint.position, Quaternion.identity, transform);
+            Destroy(dashWind, 0.5f);
+            
         }
         else
         {
@@ -176,6 +187,7 @@ public class Player1 : MonoBehaviour
 
         moveSpeed = originalSpeed;
     }
+
 
     public void StrikePlayer()
     {

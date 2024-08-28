@@ -305,6 +305,37 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!1 &445957797
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 445957798}
+  m_Layer: 0
+  m_Name: Dash Wind Position
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &445957798
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 445957797}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.64, y: -1.07, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1752193498}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -465,6 +496,7 @@ Transform:
   m_Children:
   - {fileID: 2127806348}
   - {fileID: 290487624}
+  - {fileID: 445957798}
   m_Father: {fileID: 1711969208}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!50 &1752193499
@@ -627,6 +659,8 @@ MonoBehaviour:
   moveSpeed: 7
   moveDash: 12
   dashDuration: 0.2
+  dashWindPrefab: {fileID: 1596637653403766289, guid: ba23c9b941c084f4a9806ec350615585, type: 3}
+  dashWindPoint: {fileID: 445957798}
   moveStrike: 12
   strikeDuration: 0.2
   moveInput: {x: 0, y: 0, z: 0}
@@ -638,7 +672,7 @@ MonoBehaviour:
   fallJump: 7
   bulletPrefab: {fileID: 2338204251325384115, guid: e47c0378ee263dd4c939eba4e402335d, type: 3}
   firePoint: {fileID: 290487624}
-  bulletForce: 10
+  bulletForce: 15
   delayBeforeShooting: 0.3
 --- !u!1 &1880234583
 GameObject:
