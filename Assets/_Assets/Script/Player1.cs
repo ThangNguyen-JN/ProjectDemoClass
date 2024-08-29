@@ -119,9 +119,6 @@ public class Player1 : MonoBehaviour
         {
             animator.ResetTrigger("jumpAttack");
         }
-
-        
-
     }
 
     public void AttackPlayer()
@@ -169,12 +166,13 @@ public class Player1 : MonoBehaviour
             animator.SetTrigger("dash");
             StartCoroutine(Dash());
             GameObject dashWind = Instantiate(dashWindPrefab, dashWindPoint.position, Quaternion.identity, transform);
-            Destroy(dashWind, 0.5f);
+            Destroy(dashWind, 0.45f);
             
         }
         else
         {
             animator.ResetTrigger("dash");
+            animator.SetBool("isRuning", isMoving);
         }
     }
 
@@ -196,7 +194,6 @@ public class Player1 : MonoBehaviour
             animator.SetTrigger("strike");
             StartCoroutine(Strike());
         }
-
         else
         {
             animator.ResetTrigger("strike");
