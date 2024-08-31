@@ -6,6 +6,7 @@ using UnityEngine.UIElements;
 public class Player1 : MonoBehaviour
 {
     public float moveSpeed = 7f;
+    public Vector3 moveInput;
 
     public float moveDash = 15f;
     public float dashDuration = 0.2f;
@@ -14,10 +15,9 @@ public class Player1 : MonoBehaviour
 
     public float moveStrike = 15f;
     public float strikeDuration = 0.2f;
+
     private Rigidbody2D rb;
     private Animator animator;
-
-    public Vector3 moveInput;
 
     private bool isMoving = false;
     private bool isCrouch = false;
@@ -62,10 +62,22 @@ public class Player1 : MonoBehaviour
 
     public void MovePlayer()
     {
-        moveInput.x = Input.GetAxisRaw("Horizontal");
+        if (Input.GetKey(KeyCode.A))
+        {
+            moveInput.x = -1;
+        }
+
+        else if (Input.GetKey(KeyCode.D)) 
+        {
+            moveInput.x = 1;
+        }
+
+        else
+        {
+            moveInput.x = 0;
+        }
 
         transform.position += moveInput * moveSpeed * Time.deltaTime;
-
 
         if (moveInput.x != 0)
         {
@@ -97,6 +109,8 @@ public class Player1 : MonoBehaviour
             animator.SetBool("jumping", true);
             isGrounded = false;
             isJumping = true;
+            isMoving = true;
+
         }
         else
         {
@@ -114,11 +128,13 @@ public class Player1 : MonoBehaviour
             animator.SetTrigger("jumpAttack");
             Debug.Log("JumpAttack");
 
-        }
+        } 
         else
         {
             animator.ResetTrigger("jumpAttack");
         }
+
+
     }
 
     public void AttackPlayer()
