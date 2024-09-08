@@ -9,7 +9,7 @@ public class Bullet : MonoBehaviour
     private Rigidbody2D rb;
     public float life = 5f;
     public float destroyDelay = 2f;
-    // Start is called before the first frame update
+
     void Start()
     {
         animator = GetComponent<Animator>();

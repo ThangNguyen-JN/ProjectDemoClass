@@ -37,6 +37,8 @@ public class Player1 : MonoBehaviour
     Vector2 shootDirection;
     public float delayBeforeShooting = 1f;
 
+    private bool isHurt = false;
+    private bool isBlock = false;
 
     void Start()
     {
@@ -151,12 +153,13 @@ public class Player1 : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.K) && moveInput.x == 0)
         {
-
             animator.SetBool("def", true);
+            isBlock = true;
         }
         else
         {
             animator.SetBool("def", false);
+            isBlock = false;
         }
     }
 
@@ -166,6 +169,7 @@ public class Player1 : MonoBehaviour
         {
             animator.SetBool("crouch", true);
             isCrouch = true;
+
         }
         else
         {
@@ -226,11 +230,6 @@ public class Player1 : MonoBehaviour
         moveSpeed = originalSpeed;
     }
 
-    public void HurtPlayer()
-    {
-
-    }
-
     public void CastPlayer()
     {
         if (Input.GetKeyDown(KeyCode.H) && isGrounded == true && isCrouch == false)
@@ -267,4 +266,43 @@ public class Player1 : MonoBehaviour
             shootDirection = Vector2.left;
         }
     }
+
+    public void OnCollisionEnter2D(Collision2D collision)
+    {
+        if(collision.gameObject.tag == "bullet")
+        {
+            if (isBlock == true)
+            {
+                isHurt = false;
+            }
+
+            else
+            {
+                isHurt = true;
+            }
+
+            if (isHurt == true)
+            {
+                animator.SetTrigger("hurt");
+                StartCoroutine(StopMovementWhenHurt(0.5f));
+            } 
+        }
+
+        else
+        {
+            animator.ResetTrigger("hurt");
+            isHurt = false;
+        }
+    }
+
+    private IEnumerator StopMovementWhenHurt(float duration)
+    {
+        float originalSpeed = moveSpeed;
+        float originalJumpPower = jumpPower;
+        moveSpeed = 0f;
+        jumpPower = 0f;
+        yield return new WaitForSeconds(0.5f);
+        moveSpeed = originalSpeed;
+        jumpPower = originalJumpPower;
+    }    
 }
